@@ -11,7 +11,7 @@ api_gateway_url = "https://vjo7wzkvj7.execute-api.ap-south-1.amazonaws.com/prod"
 @app.route('/student', methods=['GET'])
 def get_students():
     try:
-        response = requests.get(api_gateway_url)
+        response = request.get(api_gateway_url)
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -21,7 +21,7 @@ def get_students():
 @app.route('/student/<student_id>', methods=['GET'])
 def get_student(student_id):
     try:
-        response = requests.get(f"{api_gateway_url}/{student_id}")
+        response = request.get(f"{api_gateway_url}/{student_id}")
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -31,7 +31,7 @@ def get_student(student_id):
 def create_student():
     try:
         data = request.get_json()
-        response = requests.post(api_gateway_url, json=data)
+        response = request.post(api_gateway_url, json=data)
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -41,7 +41,7 @@ def create_student():
 def update_student(student_id):
     try:
         data = request.get_json()
-        response = requests.put(f"{api_gateway_url}/{student_id}", json=data)
+        response = request.put(f"{api_gateway_url}/{student_id}", json=data)
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -50,7 +50,7 @@ def update_student(student_id):
 @app.route('/student/<student_id>', methods=['DELETE'])
 def delete_student(student_id):
     try:
-        response = requests.delete(f"{api_gateway_url}/{student_id}")
+        response = request.delete(f"{api_gateway_url}/{student_id}")
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
