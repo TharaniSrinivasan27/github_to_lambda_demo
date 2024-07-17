@@ -10,7 +10,7 @@ api_gateway_url = "https://vjo7wzkvj7.execute-api.ap-south-1.amazonaws.com/prod"
 @app.route('/student', methods=['GET'])
 def get_students():
     try:
-        response = requests.get(api_gateway_url)
+        response = request.get(api_gateway_url)
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -19,7 +19,7 @@ def get_students():
 @app.route('/student/<studentid>', methods=['GET'])
 def get_student(studentid):
     try:
-        response = requests.get(f"{api_gateway_url}/{student_id}")
+        response = request.get(f"{api_gateway_url}/{studentid}")
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -56,7 +56,7 @@ def update_student(studentid):
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
         # Send PUT request to API Gateway URL
-        response = requests.put(f"{api_gateway_url}/{student_id}", json=data)
+        response = request.put(f"{api_gateway_url}/{studentid}", json=data)
         return jsonify(response.json()), response.status_code
 
     except Exception as e:
@@ -66,7 +66,7 @@ def update_student(studentid):
 @app.route('/student/<studentid>', methods=['DELETE'])
 def delete_student(studentid):
     try:
-        response = requests.delete(f"{api_gateway_url}/{student_id}")
+        response = request.delete(f"{api_gateway_url}/{studentid}")
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
