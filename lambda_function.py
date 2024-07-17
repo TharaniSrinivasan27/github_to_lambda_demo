@@ -1,4 +1,4 @@
-
+import requests
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -10,16 +10,16 @@ api_gateway_url = "https://vjo7wzkvj7.execute-api.ap-south-1.amazonaws.com/prod"
 @app.route('/student', methods=['GET'])
 def get_students():
     try:
-        response = request.get(api_gateway_url)
+        response = requests.get(api_gateway_url)
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # Display a specific student by ID
-@app.route('/student/<studentid>', methods=['GET'])
-def get_student(studentid):
+@app.route('/student/<student_id>', methods=['GET'])
+def get_student(student_id):
     try:
-        response = request.get(f"{api_gateway_url}/{studentid}")
+        response = requests.get(f"{api_gateway_url}/{student_id}")
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -29,7 +29,7 @@ def get_student(studentid):
 def create_student():
     try:
         data = request.get_json()
-        required_fields = ['studentid', 'fname', 'lname', 'contact', 'email']  # Define required fields
+        required_fields = ['id', 'fname', 'lname', 'contact', 'email']  # Define required fields
 
         # Check if all required fields are present
         for field in required_fields:
@@ -37,15 +37,15 @@ def create_student():
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
         # Send POST request to API Gateway URL
-        response = request.post(api_gateway_url, json=data)
+        response = requests.post(api_gateway_url, json=data)
         return jsonify(response.json()), response.status_code
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # Update a student by ID
-@app.route('/student/<studentid>', methods=['PUT'])
-def update_student(studentid):
+@app.route('/student/<student_id>', methods=['PUT'])
+def update_student(student_id):
     try:
         data = request.get_json()
         required_fields = ['fname', 'lname', 'contact', 'email']  # Define required fields for update
@@ -56,17 +56,17 @@ def update_student(studentid):
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
         # Send PUT request to API Gateway URL
-        response = request.put(f"{api_gateway_url}/{studentid}", json=data)
+        response = requests.put(f"{api_gateway_url}/{student_id}", json=data)
         return jsonify(response.json()), response.status_code
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # Delete a student by ID
-@app.route('/student/<studentid>', methods=['DELETE'])
-def delete_student(studentid):
+@app.route('/student/<student_id>', methods=['DELETE'])
+def delete_student(student_id):
     try:
-        response = request.delete(f"{api_gateway_url}/{studentid}")
+        response = requests.delete(f"{api_gateway_url}/{student_id}")
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
