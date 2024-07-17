@@ -1,75 +1,118 @@
+import json
 import requests
-from flask import Flask, request, jsonify
-
-app = Flask(__name__)
 
 # API Gateway endpoint URL
 api_gateway_url = "https://vjo7wzkvj7.execute-api.ap-south-1.amazonaws.com/prod"
 
-# Display all students
-@app.route('/student', methods=['GET'])
-def get_students():
+# Lambda handler function
+def lambda_handler(event, context):
+    # Extract HTTP method and path from the event
+    http_method = event['httpMethod']
+    path = event['path']
+    
+    # Routing based on HTTP method and path
+    if http_method == 'GET' and path == '/student':
+        return get_students(event)
+    elif http_method == 'GET' and path.startswith('/student/'):
+        student_id = path.split('/')[-1]
+        return get_student(student_id)
+    elif http_method == 'POST' and path == '/student':
+        return create_student(event)
+    elif http_method == 'PUT' and path.startswith('/student/'):
+        student_id = path.split('/')[-1]
+        return update_student(student_id, event)
+    elif http_method == 'DELETE' and path.startswith('/student/'):
+        student_id = path.split('/')[-1]
+        return delete_student(student_id)
+    else:
+        return {
+            'statusCode': 404,
+            'body': json.dumps({'error': 'Endpoint not found'})
+        }
+
+# Helper functions for handling API requests
+
+def get_students(event):
     try:
         response = requests.get(api_gateway_url)
-        return jsonify(response.json()), response.status_code
+        return {
+            'statusCode': response.status_code,
+            'body': response.json()
+        }
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
 
-# Display a specific student by ID
-@app.route('/student/<studentid>', methods=['GET'])
 def get_student(studentid):
     try:
         response = requests.get(f"{api_gateway_url}/{studentid}")
-        return jsonify(response.json()), response.status_code
+        return {
+            'statusCode': response.status_code,
+            'body': response.json()
+        }
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
 
-# Create a new student
-@app.route('/student', methods=['POST'])
-def create_student():
+def create_student(event):
     try:
-        data = request.get_json()
-        required_fields = ['studentid', 'fname', 'lname', 'contact', 'email']  # Define required fields
+        data = json.loads(event['body'])
+        required_fields = ['studentid', 'fname', 'lname', 'contact', 'email']
 
-        # Check if all required fields are present
         for field in required_fields:
             if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+                return {
+                    'statusCode': 400,
+                    'body': json.dumps({'error': f'Missing required field: {field}'})
+                }
 
-        # Send POST request to API Gateway URL
         response = requests.post(api_gateway_url, json=data)
-        return jsonify(response.json()), response.status_code
-
+        return {
+            'statusCode': response.status_code,
+            'body': response.json()
+        }
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
 
-# Update a student by ID
-@app.route('/student/<studentid>', methods=['PUT'])
-def update_student(studentid):
+def update_student(studentid, event):
     try:
-        data = request.get_json()
-        required_fields = ['fname', 'lname', 'contact', 'email']  # Define required fields for update
+        data = json.loads(event['body'])
+        required_fields = ['fname', 'lname', 'contact', 'email']
 
-        # Check if all required fields are present
         for field in required_fields:
             if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
+                return {
+                    'statusCode': 400,
+                    'body': json.dumps({'error': f'Missing required field: {field}'})
+                }
 
-        # Send PUT request to API Gateway URL
         response = requests.put(f"{api_gateway_url}/{studentid}", json=data)
-        return jsonify(response.json()), response.status_code
-
+        return {
+            'statusCode': response.status_code,
+            'body': response.json()
+        }
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
 
-# Delete a student by ID
-@app.route('/student/<studentid>', methods=['DELETE'])
 def delete_student(studentid):
     try:
         response = requests.delete(f"{api_gateway_url}/{studentid}")
-        return jsonify(response.json()), response.status_code
+        return {
+            'statusCode': response.status_code,
+            'body': response.json()
+        }
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
