@@ -15,12 +15,12 @@ def lambda_handler(event, context):
         return get_students(event)
     elif http_method == 'GET' and path.startswith('/student/'):
         student_id = path.split('/')[-1]
-        return get_student(student_id)
+        return get_student(studentid)
     elif http_method == 'POST' and path == '/student':
         return create_student(event)
     elif http_method == 'PUT' and path.startswith('/student/'):
         student_id = path.split('/')[-1]
-        return update_student(student_id, event)
+        return update_student(studentid, event)
     elif http_method == 'DELETE' and path.startswith('/student/'):
         student_id = path.split('/')[-1]
         return delete_student(student_id)
