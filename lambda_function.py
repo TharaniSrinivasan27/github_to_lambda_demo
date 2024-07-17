@@ -1,4 +1,4 @@
-import requests
+
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -37,7 +37,7 @@ def create_student():
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
         # Send POST request to API Gateway URL
-        response = requests.post(api_gateway_url, json=data)
+        response = request.post(api_gateway_url, json=data)
         return jsonify(response.json()), response.status_code
 
     except Exception as e:
