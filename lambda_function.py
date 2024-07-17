@@ -16,10 +16,10 @@ def get_students():
         return jsonify({'error': str(e)}), 500
 
 # Display a specific student by ID
-@app.route('/student/<student_id>', methods=['GET'])
-def get_student(student_id):
+@app.route('/student/<studentid>', methods=['GET'])
+def get_student(studentid):
     try:
-        response = requests.get(f"{api_gateway_url}/{student_id}")
+        response = requests.get(f"{api_gateway_url}/{studentid}")
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -29,7 +29,7 @@ def get_student(student_id):
 def create_student():
     try:
         data = request.get_json()
-        required_fields = ['id', 'fname', 'lname', 'contact', 'email']  # Define required fields
+        required_fields = ['studentid', 'fname', 'lname', 'contact', 'email']  # Define required fields
 
         # Check if all required fields are present
         for field in required_fields:
@@ -44,8 +44,8 @@ def create_student():
         return jsonify({'error': str(e)}), 500
 
 # Update a student by ID
-@app.route('/student/<student_id>', methods=['PUT'])
-def update_student(student_id):
+@app.route('/student/<studentid>', methods=['PUT'])
+def update_student(studentid):
     try:
         data = request.get_json()
         required_fields = ['fname', 'lname', 'contact', 'email']  # Define required fields for update
@@ -56,17 +56,17 @@ def update_student(student_id):
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
         # Send PUT request to API Gateway URL
-        response = requests.put(f"{api_gateway_url}/{student_id}", json=data)
+        response = requests.put(f"{api_gateway_url}/{studentid}", json=data)
         return jsonify(response.json()), response.status_code
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # Delete a student by ID
-@app.route('/student/<student_id>', methods=['DELETE'])
-def delete_student(student_id):
+@app.route('/student/<studentid>', methods=['DELETE'])
+def delete_student(studentid):
     try:
-        response = requests.delete(f"{api_gateway_url}/{student_id}")
+        response = requests.delete(f"{api_gateway_url}/{studentid}")
         return jsonify(response.json()), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
