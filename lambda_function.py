@@ -27,7 +27,7 @@ def get_student(student_id):
         return jsonify({'error': str(e)}), 500
 
 #create a new student
-@app.route('/students', methods=['POST'])
+@app.route('/student', methods=['POST'])
 def create_student():
     try:
         data = request.get_json()
