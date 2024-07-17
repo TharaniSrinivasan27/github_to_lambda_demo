@@ -1,26 +1,27 @@
 import json
-import requests
+import boto3
 
-# API Gateway endpoint URL
-api_gateway_url = "https://vjo7wzkvj7.execute-api.ap-south-1.amazonaws.com/prod"
+# Initialize DynamoDB client
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('index')  # Replace 'index' with your DynamoDB table name
 
 # Lambda handler function
 def lambda_handler(event, context):
     # Extract HTTP method and path from the event
     http_method = event['httpMethod']
     path = event['path']
-    
+
     # Routing based on HTTP method and path
     if http_method == 'GET' and path == '/student':
         return get_students(event)
     elif http_method == 'GET' and path.startswith('/student/'):
         student_id = path.split('/')[-1]
-        return get_student(studentid)
+        return get_student(student_id)
     elif http_method == 'POST' and path == '/student':
         return create_student(event)
     elif http_method == 'PUT' and path.startswith('/student/'):
         student_id = path.split('/')[-1]
-        return update_student(studentid, event)
+        return update_student(student_id, event)
     elif http_method == 'DELETE' and path.startswith('/student/'):
         student_id = path.split('/')[-1]
         return delete_student(student_id)
@@ -34,10 +35,11 @@ def lambda_handler(event, context):
 
 def get_students(event):
     try:
-        response = requests.get(api_gateway_url)
+        # Example: Fetch all items from DynamoDB table
+        response = table.scan()
         return {
-            'statusCode': response.status_code,
-            'body': response.json()
+            'statusCode': 200,
+            'body': json.dumps(response['Items'])
         }
     except Exception as e:
         return {
@@ -45,13 +47,20 @@ def get_students(event):
             'body': json.dumps({'error': str(e)})
         }
 
-def get_student(studentid):
+def get_student(student_id):
     try:
-        response = requests.get(f"{api_gateway_url}/{studentid}")
-        return {
-            'statusCode': response.status_code,
-            'body': response.json()
-        }
+        # Example: Fetch item from DynamoDB by student_id
+        response = table.get_item(Key={'studentid': student_id})
+        if 'Item' in response:
+            return {
+                'statusCode': 200,
+                'body': json.dumps(response['Item'])
+            }
+        else:
+            return {
+                'statusCode': 404,
+                'body': json.dumps({'error': 'Student not found'})
+            }
     except Exception as e:
         return {
             'statusCode': 500,
@@ -70,10 +79,12 @@ def create_student(event):
                     'body': json.dumps({'error': f'Missing required field: {field}'})
                 }
 
-        response = requests.post(api_gateway_url, json=data)
+        # Example: Insert item into DynamoDB table
+        table.put_item(Item=data)
+
         return {
-            'statusCode': response.status_code,
-            'body': response.json()
+            'statusCode': 200,
+            'body': json.dumps({'message': 'Student created successfully', 'student': data})
         }
     except Exception as e:
         return {
@@ -81,7 +92,7 @@ def create_student(event):
             'body': json.dumps({'error': str(e)})
         }
 
-def update_student(studentid, event):
+def update_student(student_id, event):
     try:
         data = json.loads(event['body'])
         required_fields = ['fname', 'lname', 'contact', 'email']
@@ -93,10 +104,21 @@ def update_student(studentid, event):
                     'body': json.dumps({'error': f'Missing required field: {field}'})
                 }
 
-        response = requests.put(f"{api_gateway_url}/{studentid}", json=data)
+        # Example: Update item in DynamoDB table
+        table.update_item(
+            Key={'studentid': student_id},
+            UpdateExpression='SET fname = :f, lname = :l, contact = :c, email = :e',
+            ExpressionAttributeValues={
+                ':f': data['fname'],
+                ':l': data['lname'],
+                ':c': data['contact'],
+                ':e': data['email']
+            }
+        )
+
         return {
-            'statusCode': response.status_code,
-            'body': response.json()
+            'statusCode': 200,
+            'body': json.dumps({'message': 'Student updated successfully', 'student_id': student_id, 'updated_fields': data})
         }
     except Exception as e:
         return {
@@ -104,12 +126,14 @@ def update_student(studentid, event):
             'body': json.dumps({'error': str(e)})
         }
 
-def delete_student(studentid):
+def delete_student(student_id):
     try:
-        response = requests.delete(f"{api_gateway_url}/{studentid}")
+        # Example: Delete item from DynamoDB table
+        table.delete_item(Key={'studentid': student_id})
+
         return {
-            'statusCode': response.status_code,
-            'body': response.json()
+            'statusCode': 200,
+            'body': json.dumps({'message': 'Student deleted successfully', 'student_id': student_id})
         }
     except Exception as e:
         return {
