@@ -99,7 +99,7 @@ def create_student(event):
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'message': 'Student created successfully', 'student': data})
+            'body': json.dumps({'message': 'Student field created successfully', 'student': data})
         }
     except Exception as e:
         return {
