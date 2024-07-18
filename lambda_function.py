@@ -3,7 +3,7 @@ import boto3
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('index')  # Replace 'index' with your DynamoDB table name
+table = dynamodb.Table('index')  
 
 # Lambda handler function
 def lambda_handler(event, context):
@@ -26,12 +26,10 @@ def lambda_handler(event, context):
             return get_student(student_id)
         elif http_method == 'POST' and path == '/student':
             return create_student(event)
-        elif http_method == 'PUT' and path.startswith('/student/'):
-            student_id = path.split('/')[-1]
-            return update_student(student_id, event)
-        elif http_method == 'DELETE' and path.startswith('/student/'):
-            student_id = path.split('/')[-1]
-            return delete_student(student_id)
+        elif http_method == 'PUT' and path == '/student':
+            return update_student(event)
+        elif http_method == 'DELETE' and path == '/student':
+            return delete_student(event)
         else:
             return {
                 'statusCode': 404,
@@ -109,8 +107,9 @@ def create_student(event):
             'body': json.dumps({'error': str(e)})
         }
 
-def update_student(student_id, event):
+def update_student(event):
     try:
+        student_id = event['queryStringParameters']['studentid']
         data = json.loads(event['body'])
         required_fields = ['fname', 'lname', 'contact', 'email']
 
@@ -135,7 +134,7 @@ def update_student(student_id, event):
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'message': 'Student updated successfully', 'student_id': student_id, 'updated_fields': data})
+            'body': json.dumps({'message': 'Student updated successfully', 'studentid': student_id, 'updated_fields': data})
         }
     except Exception as e:
         return {
@@ -143,14 +142,15 @@ def update_student(student_id, event):
             'body': json.dumps({'error': str(e)})
         }
 
-def delete_student(student_id):
+def delete_student(event):
     try:
+        student_id = event['queryStringParameters']['studentid']
         # Example: Delete item from DynamoDB table
         table.delete_item(Key={'studentid': student_id})
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'message': 'Student deleted successfully', 'student_id': student_id})
+            'body': json.dumps({'message': 'Student deleted successfully', 'studentid': student_id})
         }
     except Exception as e:
         return {
